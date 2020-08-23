@@ -41,6 +41,10 @@ app.get('/authQR/',(req,res) => {
     })
 })
 
+app.get('/twitchUpdates',(req,res) => {
+    console.log(req)
+})
+
 const bot = new discord.Client()
 
 bot.on("ready",() => {
