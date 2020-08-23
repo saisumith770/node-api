@@ -35,7 +35,7 @@ io.on('connect',socket => {
 })
 
 app.get('/authQR/',(req,res) => {
-    io.to(id).emit('auth','your authenticated')
+    io.to(req.query.id).emit('auth','your authenticated')
     res.send({
         status : "done"
     })
