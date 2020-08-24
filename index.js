@@ -43,6 +43,7 @@ app.get('/authQR/',(req,res) => {
 
 app.get('/twitchUpdates',(req,res) => {
     io.sockets.emit("twitchUpdate",req.body)
+    console.log(req.body)
     res.json({
         status : "success"
     })
