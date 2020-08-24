@@ -44,7 +44,7 @@ app.get('/authQR/',(req,res) => {
 app.get('/twitchUpdates',(req,res) => {
     console.log(req)
     res.json({
-        updated : true
+        req
     })
 })
 
@@ -56,10 +56,7 @@ bot.on("ready",() => {
 })
 
 bot.on("presenceUpdate", (oldMember,newMember) => {
-    newMember.activities.forEach(e => {
-        if(e.name == "Spotify") console.log(e)
-    })
-    //io.sockets.emit('newStatus',{data : newMember.activities,discordID : newMember.userID})
+    io.sockets.emit('newStatus',{data : newMember.activities,discordID : newMember.userID})
 } )
 
 bot.login("NzQxMTk5OTEwMDgyMTgzMjU5.Xy0GNQ.uR6xQMiorGsLYaB7cZUJ6-YKwcQ")
