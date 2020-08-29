@@ -117,12 +117,16 @@ app.get('/authQR/',(req,res) => {
     })
 })
 
-app.post('/twitchUpdates',(req,res) => {
-    io.sockets.emit("twitchUpdate",req.body)
-    console.log(req.body)
-    res.json({
-        status : "success"
-    })
+app.all('/twitchUpdates',(req,res) => {
+    if(req.method === "GET"){
+        if(req.query["hub.challenge"]){
+            res.send(req.query["hub.challenge"])
+        }
+    }
+    else if(req.method === "POST"){
+        console.log(req.body,req.query)
+        io.sockets.emit("twitchUpdate",req.body)
+    }
 })
 
 const bot = new discord.Client()
