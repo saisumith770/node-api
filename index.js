@@ -50,7 +50,7 @@ app.post('/twitchCode',async(req,res) => {
             let user_id = data.data.data[0].id
             axios.post('https://api.twitch.tv/helix/webhooks/hub',{
             "hub.callback" : "https://pulse-online.herokuapp.com/twitchUpdates",
-            "hub.mode" : "unsubscribe",
+            "hub.mode" : "subscribe",
             "hub.topic" : `https://api.twitch.tv/helix/streams?user_id=${user_id}`,
             "hub.lease_seconds" : 864000
             },{
@@ -86,7 +86,7 @@ app.post('/refreshTwitchSubscription',(req,res) => {
         let refresh_token = data.data.refresh_token
         axios.post('https://api.twitch.tv/helix/webhooks/hub',{
         "hub.callback" : "https://pulse-online.herokuapp.com/twitchUpdates",
-        "hub.mode" : "unsubscribe",
+        "hub.mode" : "subscribe",
         "hub.topic" : `https://api.twitch.tv/helix/streams?user_id=${req.query.user_id}`,
         "hub.lease_seconds" : 864000
         },{
