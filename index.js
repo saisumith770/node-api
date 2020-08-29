@@ -126,6 +126,9 @@ app.all('/twitchUpdates',(req,res) => {
     else if(req.method === "POST"){
         console.log(req.body,req.query)
         io.sockets.emit("twitchUpdate",req.body)
+        res.json({
+            status : "done"
+        })
     }
 })
 
