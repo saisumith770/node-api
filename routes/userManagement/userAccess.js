@@ -26,9 +26,8 @@ const {fakeUsers,Roles} = require('../../databaseProjections/dbUsers')
 router.get('/:domain',(req,res) => {
     for(var i=0;i<fakeUsers.length;i++){
         if(req.params.domain == fakeUsers[i].domain){
-            return res.send({
-                data :fakeUsers[i],
-                authData
+            return res.json({
+                data :fakeUsers[i]
             })
         }
     }
