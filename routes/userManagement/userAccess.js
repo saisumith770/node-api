@@ -3,23 +3,37 @@ const {verifyTokenFunc} = require('../auth/authenticationRoute')
 const jwt = require('jsonwebtoken')
 const {fakeUsers,Roles} = require('../../databaseProjections/dbUsers')
 
-router.get('/:domain',verifyTokenFunc,(req,res) => {
-    jwt.verify(req.token,'secret_key',(err,authData) => {
-        if(err){
-            return res.sendStatus(403)
-        }else{
-            for(var i=0;i<fakeUsers.length;i++){
-                if(req.params.domain == fakeUsers[i].domain){
-                    return res.send({
-                        data :fakeUsers[i],
-                        authData
-                    })
-                }
-            }
+// router.get('/:domain',verifyTokenFunc,(req,res) => {
+//     jwt.verify(req.token,'secret_key',(err,authData) => {
+//         if(err){
+//             return res.sendStatus(403)
+//         }else{
+//             for(var i=0;i<fakeUsers.length;i++){
+//                 if(req.params.domain == fakeUsers[i].domain){
+//                     return res.send({
+//                         data :fakeUsers[i],
+//                         authData
+//                     })
+//                 }
+//             }
+//             return res.send({
+//                 status : 'nope'
+//             })
+//         }
+//     })
+// })
+
+router.get('/:domain',(req,res) => {
+    for(var i=0;i<fakeUsers.length;i++){
+        if(req.params.domain == fakeUsers[i].domain){
             return res.send({
-                status : 'nope'
+                data :fakeUsers[i],
+                authData
             })
         }
+    }
+    return res.send({
+        status : 'nope'
     })
 })
 
