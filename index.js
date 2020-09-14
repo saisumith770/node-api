@@ -6,6 +6,7 @@ const io = require('socket.io')(http)
 const discord = require('discord.js')
 const port = process.env.PORT || 8080
 const axios = require("axios")
+const {getLinkPreview} = require('link-preview-js')
 
 const {Authrouter} = require('./routes/auth/authenticationRoute')
 const userRoutes = require('./routes/userManagement/userAccess')
@@ -13,6 +14,29 @@ const userModRoutes = require('./routes/userManagement/userStats')
 require('dotenv/config')
 
 let id
+function getTwitchSubscription(user_id,access_token,refresh_token){
+    axios.post('https://api.twitch.tv/helix/webhooks/hub',{
+        "hub.callback" : `https://pulse-online.herokuapp.com/twitchUpdates/${user_id}`,
+        "hub.mode" : "subscribe",
+        "hub.topic" : `https://api.twitch.tv/helix/streams?user_id=${user_id}`,
+        "hub.lease_seconds" : 864000
+    },{
+        headers : {
+            Authorization : `Bearer ${access_token}`,
+            "Client-ID" : "f6dg5eonukchb00i100jmxjnnji2ul"
+        }
+    })
+    .then(() => {
+        res.json({
+            user_id,
+            refresh_token,
+            status : "done"
+        })
+    })
+    .catch(err => {res.json({
+        status : "subscription was not successfull"
+    });console.log(err)})
+}
 
 app.use(cors())
 app.use(express.json())
@@ -48,27 +72,7 @@ app.post('/twitchCode',async(req,res) => {
         })
         .then(data => {
             let user_id = data.data.data[0].id
-            axios.post('https://api.twitch.tv/helix/webhooks/hub',{
-            "hub.callback" : "https://pulse-online.herokuapp.com/twitchUpdates",
-            "hub.mode" : "subscribe",
-            "hub.topic" : `https://api.twitch.tv/helix/streams?user_id=${user_id}`,
-            "hub.lease_seconds" : 864000
-            },{
-                headers : {
-                    Authorization : `Bearer ${access_token}`,
-                    "Client-ID" : "f6dg5eonukchb00i100jmxjnnji2ul"
-                }
-            })
-            .then(() => {
-                res.json({
-                    user_id,
-                    refresh_token,
-                    status : "done"
-                })
-            })
-            .catch(err => {res.json({
-                status : "subscription was not successfull"
-            });console.log(err)})
+            getTwitchSubscription(user_id,access_token,refresh_token)
         })
         .catch(err => {res.json({
             status : "username doesn't exists"
@@ -84,26 +88,7 @@ app.post('/refreshTwitchSubscription',(req,res) => {
     .then(data => {
         let access_token = data.data.access_token
         let refresh_token = data.data.refresh_token
-        axios.post('https://api.twitch.tv/helix/webhooks/hub',{
-        "hub.callback" : "https://pulse-online.herokuapp.com/twitchUpdates",
-        "hub.mode" : "subscribe",
-        "hub.topic" : `https://api.twitch.tv/helix/streams?user_id=${req.query.user_id}`,
-        "hub.lease_seconds" : 864000
-        },{
-            headers : {
-                Authorization : `Bearer ${access_token}`,
-                "Client-ID" : "f6dg5eonukchb00i100jmxjnnji2ul"
-            }
-        })
-        .then(() => {
-            res.json({
-                refresh_token,
-                status : "done"
-            })
-        })
-        .catch(err => {res.json({
-            status : "subscription was not successfull"
-        });console.log(err)})
+        getTwitchSubscription(req.query.user_id,access_token,refresh_token)
     })
     .catch(err => {res.json({
         status : "internal server error ,please report this issue"
@@ -117,19 +102,28 @@ app.get('/authQR/',(req,res) => {
     })
 })
 
-app.all('/twitchUpdates',(req,res) => {
+app.all('/twitchUpdates/:user_id',(req,res) => {
     if(req.method === "GET"){
         if(req.query["hub.challenge"]){
             res.send(req.query["hub.challenge"])
         }
     }
     else if(req.method === "POST"){
-        console.log(req.body,req.query)
-        io.sockets.emit("twitchUpdate",req.body)
+        io.sockets.emit("twitchUpdate",{data : req.body,user_id : req.query.user_id})
         res.json({
             status : "done"
         })
     }
+})
+
+app.get('/linkPreview',(req,res) => {
+    getLinkPreview(req.query.link)
+    .then(data => {
+        res.json(data)
+    })
+    .catch(err => {
+        res.json(err)
+    })
 })
 
 const bot = new discord.Client()
