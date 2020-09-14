@@ -116,7 +116,7 @@ app.all('/twitchUpdates/:user_id',(req,res) => {
     }
 })
 
-app.get('/linkPreview',(req,res) => {
+app.post('/linkPreview',(req,res) => {
     getLinkPreview(req.query.link)
     .then(data => {
         res.json(data)
